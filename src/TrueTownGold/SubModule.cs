@@ -20,10 +20,16 @@ namespace TrueTownGold
             base.OnSubModuleLoad();
             try
             {
+                TownGoldSettings settings = TownGoldSettings.LoadFromDefaultPath();
+                float multiplier = settings.GetValidatedGlobalTownGoldMultiplier();
+                int minimumTownGold = settings.GetValidatedMinimumTownGold();
+                int maximumTownGold = settings.GetValidatedMaximumTownGold();
                 _harmony = new Harmony("com.truetowngold.bannerlord");
                 _harmony.PatchAll();
                 InformationManager.DisplayMessage(
-                    new InformationMessage("True Town Gold: Loaded successfully.", Colors.Green));
+                    new InformationMessage(
+                        $"True Town Gold: Loaded successfully. Multiplier {multiplier:0.##}x. Clamp {minimumTownGold:N0}-{maximumTownGold:N0}.",
+                        Colors.Green));
             }
             catch (Exception ex)
             {

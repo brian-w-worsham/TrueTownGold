@@ -37,6 +37,36 @@ New-Item -ItemType Directory -Path $binDir -Force | Out-Null
 
 Copy-Item "Module\SubModule.xml" -Destination $TargetModuleDir -Force
 
+$settingsFile = "Module\TrueTownGold.settings.xml"
+$targetSettingsFile = Join-Path $TargetModuleDir "TrueTownGold.settings.xml"
+if (Test-Path $settingsFile) {
+    if (Test-Path $targetSettingsFile) {
+        try {
+            [xml]$templateSettings = Get-Content $settingsFile
+            [xml]$existingSettings = Get-Content $targetSettingsFile
+
+            foreach ($templateNode in $templateSettings.DocumentElement.ChildNodes) {
+                if ($templateNode.NodeType -ne [System.Xml.XmlNodeType]::Element) {
+                    continue
+                }
+
+                if (-not $existingSettings.DocumentElement.SelectSingleNode($templateNode.Name)) {
+                    $importedNode = $existingSettings.ImportNode($templateNode, $true)
+                    [void]$existingSettings.DocumentElement.AppendChild($importedNode)
+                }
+            }
+
+            $existingSettings.Save($targetSettingsFile)
+        }
+        catch {
+            Write-Warning "Could not merge missing settings keys into $targetSettingsFile. Existing file left unchanged."
+        }
+    }
+    else {
+        Copy-Item $settingsFile -Destination $targetSettingsFile -Force
+    }
+}
+
 $builtDll = "src\TrueTownGold\bin\$Configuration\net472\TrueTownGold.dll"
 if (Test-Path $builtDll) {
     Copy-Item $builtDll -Destination $binDir -Force
@@ -54,4 +84,5 @@ Write-Host "Next steps:" -ForegroundColor Yellow
 Write-Host "  1. Launch Bannerlord"
 Write-Host "  2. Go to Mods and enable 'True Town Gold'"
 Write-Host "  3. Start or load a campaign"
-Write-Host "  4. Visit a high-prosperity town and confirm merchants can afford larger sales"
+Write-Host "  4. Edit Modules\TrueTownGold\TrueTownGold.settings.xml if you want a different multiplier"
+Write-Host "  5. Visit a high-prosperity town and confirm merchants can afford larger sales"

@@ -17,7 +17,7 @@ namespace TrueTownGold
         {
         }
 
-        internal void OnDailyTickTown(Town town)
+        internal static void OnDailyTickTown(Town town)
         {
             EnsureTownHasTradeGold(town);
         }
@@ -29,8 +29,9 @@ namespace TrueTownGold
                 return false;
             }
 
-            int requiredGoldIncrease =
-                TownGoldCalculator.CalculateRequiredGoldIncrease(town.Prosperity, town.Gold);
+            int requiredGoldIncrease = TownGoldCalculator.CalculateRequiredGoldIncrease(
+                town.Prosperity,
+                town.Gold);
 
             if (requiredGoldIncrease <= 0)
             {

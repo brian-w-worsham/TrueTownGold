@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Bannerlord mod that raises the minimum trade gold available in towns based on prosperity. The implementation is campaign-behavior driven: `TrueTownGoldBehavior` listens to `DailyTickTownEvent` and tops towns up to a prosperity-based floor using `Town.ChangeGold(...)`. No game files are modified, and there is currently no settings UI or external config file.
+Bannerlord mod that raises the minimum trade gold available in towns based on prosperity. The implementation is campaign-behavior driven: `TrueTownGoldBehavior` listens to `DailyTickTownEvent` and tops towns up to a prosperity-based floor using `Town.ChangeGold(...)`. No game files are modified, and the global multiplier plus min/max clamps are configured through `Module/TrueTownGold.settings.xml`.
 
 ## Tech Stack
 
@@ -32,6 +32,7 @@ Both the main project and test project depend on the `GameFolder` MSBuild proper
 | File | Role |
 |------|------|
 | `SubModule.cs` | Mod entry point — initializes Harmony on load, registers `TrueTownGoldBehavior` for campaign games, unpatches on unload |
+| `TownGoldSettings.cs` | Loads the XML settings file and exposes the configured multiplier and clamp range |
 | `TownGoldCalculator.cs` | Pure calculation logic for target town gold and required daily top-up |
 | `TrueTownGoldBehavior.cs` | `CampaignBehaviorBase` — listens to `DailyTickTownEvent`, guards non-town cases, and applies gold increases |
 
@@ -43,16 +44,18 @@ Both the main project and test project depend on the `GameFolder` MSBuild proper
 - **Top-up, not overwrite:** The mod calculates a target floor and only adds the missing difference. If a town already has more gold than the target, leave it unchanged.
 - **Pure calculator logic:** Keep the prosperity formula and clamping behavior in `TownGoldCalculator` so it remains easy to test without live Bannerlord state.
 - **No save data:** `SyncData` is intentionally a no-op. Do not introduce persisted state unless the feature genuinely needs it.
-- **No player settings today:** There is no MCM integration, no config file, and no console command surface. If settings are introduced later, update both the README and this instruction file.
+- **Config file settings:** Keep the user-editable multiplier and clamp range in `Module/TrueTownGold.settings.xml`. Preserve safe defaults when the file is missing or invalid.
 - **Single Harmony ID:** Use `"com.truetowngold.bannerlord"` consistently if Harmony patches are added in the future.
 
 ### Tunable Constants
 
 | Constant | Default | Description |
 |---|---|---|
-| `GoldPerProsperity` | `10f` | Prosperity multiplier used to derive the target gold floor |
-| `MinimumTownGold` | `15000` | Hard lower bound for town gold |
-| `MaximumTownGold` | `150000` | Hard upper bound for town gold |
+| `BaseGoldPerProsperity` | `10f` | Baseline prosperity multiplier before the global town-gold increase |
+| `DefaultGlobalTownGoldMultiplier` | `2.0f` | Default multiplier used when the XML settings file is missing or invalid |
+| `DefaultGoldPerProsperity` | `20f` | Effective prosperity multiplier used by default to derive the target gold floor |
+| `DefaultMinimumTownGold` | `15000` | Default lower bound for town gold when the XML settings file is missing or invalid |
+| `DefaultMaximumTownGold` | `500000` | Default upper bound for town gold when the XML settings file is missing or invalid |
 
 ## Code Conventions
 

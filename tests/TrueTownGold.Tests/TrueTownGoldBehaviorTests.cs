@@ -40,9 +40,10 @@ namespace TrueTownGold.Tests
         {
             MethodInfo method = typeof(TrueTownGoldBehavior).GetMethod(
                 "OnDailyTickTown",
-                BindingFlags.Instance | BindingFlags.NonPublic);
+                BindingFlags.Static | BindingFlags.NonPublic);
 
             Assert.NotNull(method);
+            Assert.True(method.IsStatic);
             Assert.Equal(typeof(void), method.ReturnType);
             Assert.Single(method.GetParameters());
             Assert.Equal(typeof(Town), method.GetParameters()[0].ParameterType);
@@ -160,11 +161,12 @@ namespace TrueTownGold.Tests
         }
 
         [Fact]
-        public void Calculator_UsesPositiveMultiplierAndBounds()
+        public void Calculator_UsesPositiveDefaultMultiplierAndBounds()
         {
-            Assert.True(TownGoldCalculator.GoldPerProsperity > 0f);
-            Assert.True(TownGoldCalculator.MinimumTownGold > 0);
-            Assert.True(TownGoldCalculator.MaximumTownGold >= TownGoldCalculator.MinimumTownGold);
+            Assert.True(TownGoldSettings.DefaultGlobalTownGoldMultiplier > 0f);
+            Assert.True(TownGoldCalculator.DefaultGoldPerProsperity > 0f);
+            Assert.True(TownGoldCalculator.DefaultMinimumTownGold > 0);
+            Assert.True(TownGoldCalculator.DefaultMaximumTownGold >= TownGoldCalculator.DefaultMinimumTownGold);
         }
     }
 }

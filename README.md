@@ -40,20 +40,29 @@ If you are installing from a packaged release instead, place the `TrueTownGold` 
 
 ### Settings
 
-There are currently no player-adjustable settings.
+The mod now ships with a simple XML settings file:
 
-- No MCM menu
-- No XML or JSON config file
-- No in-game toggle
-- No console commands
+- `Mount & Blade II Bannerlord\Modules\TrueTownGold\TrueTownGold.settings.xml`
 
-The current built-in values are:
+To change town gold globally:
 
-- `GoldPerProsperity = 10`
+1. Exit Bannerlord.
+2. Open `TrueTownGold.settings.xml`.
+3. Change `GlobalTownGoldMultiplier`, `MinimumTownGold`, or `MaximumTownGold`.
+4. Save the file.
+5. Launch Bannerlord again.
+
+Raise `MaximumTownGold` if you want wealthy towns to exceed the old 150,000 cap.
+
+The default values are:
+
+- `BaseGoldPerProsperity = 10`
+- `GlobalTownGoldMultiplier = 2.0`
+- `DefaultGoldPerProsperity = 20`
 - `MinimumTownGold = 15,000`
-- `MaximumTownGold = 150,000`
+- `MaximumTownGold = 500,000`
 
-If you want different values, the mod would need a code change and rebuild.
+There is still no MCM menu, in-game toggle, or console command.
 
 ## Features
 
@@ -67,7 +76,13 @@ If you want different values, the mod would need a code change and rebuild.
 The mod listens to Bannerlord's `DailyTickTownEvent`. For each real trade town, it calculates a target reserve using this formula:
 
 ```text
-targetGold = clamp(prosperity × 10, 15,000, 150,000)
+targetGold = clamp(prosperity × (10 × globalTownGoldMultiplier), minimumTownGold, maximumTownGold)
+```
+
+With the default settings file, this resolves to:
+
+```text
+targetGold = clamp(prosperity × 20, 15,000, 500,000)
 ```
 
 If a town already has at least that much gold, nothing happens. If it has less, the difference is added with `Town.ChangeGold(...)`.
@@ -89,16 +104,19 @@ TrueTownGold/
 ├── deploy.ps1
 ├── README.md
 ├── Module/
-│   └── SubModule.xml
+│   ├── SubModule.xml
+│   └── TrueTownGold.settings.xml
 ├── src/
 │   └── TrueTownGold/
 │       ├── TrueTownGold.csproj
 │       ├── SubModule.cs
+│       ├── TownGoldSettings.cs
 │       ├── TownGoldCalculator.cs
 │       └── TrueTownGoldBehavior.cs
 └── tests/
     └── TrueTownGold.Tests/
         ├── TrueTownGold.Tests.csproj
+        ├── TownGoldSettingsTests.cs
         ├── TownGoldCalculatorTests.cs
         └── TrueTownGoldBehaviorTests.cs
 ```

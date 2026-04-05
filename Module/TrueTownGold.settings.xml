@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TrueTownGoldSettings>
+  <!-- Multiplies the base prosperity-to-gold rate of 10.0. -->
+  <GlobalTownGoldMultiplier>10.0</GlobalTownGoldMultiplier>
+  <!-- Lower bound applied after prosperity scaling. -->
+  <MinimumTownGold>100000</MinimumTownGold>
+  <!-- Upper bound applied after prosperity scaling. Raise this to let rich towns buy more. -->
+  <MaximumTownGold>999999999</MaximumTownGold>
+</TrueTownGoldSettings>
