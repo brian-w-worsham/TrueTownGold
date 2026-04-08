@@ -30,16 +30,16 @@ namespace TrueTownGold.Tests
         public void CalculateTargetGold_ProsperityAtMinimumBoundary_ReturnsBoundaryValue()
         {
             int targetGold = TownGoldCalculator.CalculateTargetGold(
-                750f,
+                1000f,
                 TownGoldSettings.DefaultGlobalTownGoldMultiplier);
 
-            Assert.Equal(15000, targetGold);
+            Assert.Equal(TownGoldSettings.DefaultMinimumTownGold, targetGold);
         }
 
         [Fact]
         public void CalculateTargetGold_UsesConfiguredMultiplierAndRoundsAwayFromZero()
         {
-            int targetGold = TownGoldCalculator.CalculateTargetGold(2750.5f, 2.0f);
+            int targetGold = TownGoldCalculator.CalculateTargetGold(2750.5f, 2.0f, 15000, 500000);
 
             Assert.Equal(55010, targetGold);
         }
@@ -47,7 +47,7 @@ namespace TrueTownGold.Tests
         [Fact]
         public void CalculateTargetGold_HighProsperity_IsClampedToMaximumTownGold()
         {
-            int targetGold = TownGoldCalculator.CalculateTargetGold(50000f);
+            int targetGold = TownGoldCalculator.CalculateTargetGold(20000000f);
 
             Assert.Equal(TownGoldCalculator.DefaultMaximumTownGold, targetGold);
         }
@@ -108,7 +108,9 @@ namespace TrueTownGold.Tests
             int requiredGoldIncrease = TownGoldCalculator.CalculateRequiredGoldIncrease(
                 2000f,
                 -50,
-                2.0f);
+                2.0f,
+                15000,
+                500000);
 
             Assert.Equal(40000, requiredGoldIncrease);
         }

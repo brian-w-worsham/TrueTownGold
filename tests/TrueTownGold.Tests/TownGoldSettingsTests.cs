@@ -24,6 +24,32 @@ namespace TrueTownGold.Tests
         }
 
         [Fact]
+        public void ShouldReplaceLegacyDefaults_LegacyDefaults_ReturnsTrue()
+        {
+            var settings = new TownGoldSettings
+            {
+                GlobalTownGoldMultiplier = TownGoldSettings.LegacyDefaultGlobalTownGoldMultiplier,
+                MinimumTownGold = TownGoldSettings.LegacyDefaultMinimumTownGold,
+                MaximumTownGold = TownGoldSettings.LegacyDefaultMaximumTownGold
+            };
+
+            Assert.True(TownGoldSettings.ShouldReplaceLegacyDefaults(settings));
+        }
+
+        [Fact]
+        public void ShouldReplaceLegacyDefaults_CustomSettings_ReturnsFalse()
+        {
+            var settings = new TownGoldSettings
+            {
+                GlobalTownGoldMultiplier = 6.5f,
+                MinimumTownGold = 90000,
+                MaximumTownGold = 750000
+            };
+
+            Assert.False(TownGoldSettings.ShouldReplaceLegacyDefaults(settings));
+        }
+
+        [Fact]
         public void Load_ValidFile_ReadsConfiguredValues()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));

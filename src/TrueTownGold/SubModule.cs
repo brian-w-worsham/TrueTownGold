@@ -26,9 +26,12 @@ namespace TrueTownGold
                 int maximumTownGold = settings.GetValidatedMaximumTownGold();
                 _harmony = new Harmony("com.truetowngold.bannerlord");
                 _harmony.PatchAll();
+                string migrationText = TownGoldSettings.LastLoadMigratedLegacyDefaults
+                    ? " Legacy default settings were upgraded automatically."
+                    : string.Empty;
                 InformationManager.DisplayMessage(
                     new InformationMessage(
-                        $"True Town Gold: Loaded successfully. Multiplier {multiplier:0.##}x. Clamp {minimumTownGold:N0}-{maximumTownGold:N0}.",
+                        $"True Town Gold: Loaded successfully. Multiplier {multiplier:0.##}x. Clamp {minimumTownGold:N0}-{maximumTownGold:N0}.{migrationText}",
                         Colors.Green));
             }
             catch (Exception ex)

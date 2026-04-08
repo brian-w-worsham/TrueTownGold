@@ -52,10 +52,10 @@ Both the main project and test project depend on the `GameFolder` MSBuild proper
 | Constant | Default | Description |
 |---|---|---|
 | `BaseGoldPerProsperity` | `10f` | Baseline prosperity multiplier before the global town-gold increase |
-| `DefaultGlobalTownGoldMultiplier` | `2.0f` | Default multiplier used when the XML settings file is missing or invalid |
-| `DefaultGoldPerProsperity` | `20f` | Effective prosperity multiplier used by default to derive the target gold floor |
-| `DefaultMinimumTownGold` | `15000` | Default lower bound for town gold when the XML settings file is missing or invalid |
-| `DefaultMaximumTownGold` | `500000` | Default upper bound for town gold when the XML settings file is missing or invalid |
+| `DefaultGlobalTownGoldMultiplier` | `10.0f` | Default multiplier used when the XML settings file is missing or invalid |
+| `DefaultGoldPerProsperity` | `100f` | Effective prosperity multiplier used by default to derive the target gold floor |
+| `DefaultMinimumTownGold` | `100000` | Default lower bound for town gold when the XML settings file is missing or invalid |
+| `DefaultMaximumTownGold` | `999999999` | Default upper bound for town gold when the XML settings file is missing or invalid |
 
 ## Code Conventions
 

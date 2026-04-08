@@ -11,11 +11,15 @@ namespace TrueTownGold
     internal sealed class TownGoldSettings
     {
         internal const string SettingsFileName = "TrueTownGold.settings.xml";
-        internal const float DefaultGlobalTownGoldMultiplier = 2.0f;
-        internal const int DefaultMinimumTownGold = 15000;
-        internal const int DefaultMaximumTownGold = 500000;
+        internal const float LegacyDefaultGlobalTownGoldMultiplier = 2.0f;
+        internal const int LegacyDefaultMinimumTownGold = 15000;
+        internal const int LegacyDefaultMaximumTownGold = 500000;
+        internal const float DefaultGlobalTownGoldMultiplier = 10.0f;
+        internal const int DefaultMinimumTownGold = 100000;
+        internal const int DefaultMaximumTownGold = 999999999;
 
         internal static TownGoldSettings Current { get; private set; } = new TownGoldSettings();
+        internal static bool LastLoadMigratedLegacyDefaults { get; private set; }
 
         public float GlobalTownGoldMultiplier { get; set; } = DefaultGlobalTownGoldMultiplier;
         public int MinimumTownGold { get; set; } = DefaultMinimumTownGold;
@@ -24,7 +28,15 @@ namespace TrueTownGold
         internal static TownGoldSettings LoadFromDefaultPath()
         {
             string settingsFilePath = GetDefaultSettingsFilePath();
+            LastLoadMigratedLegacyDefaults = false;
             Current = Load(settingsFilePath);
+
+            if (ShouldReplaceLegacyDefaults(Current))
+            {
+                Current = new TownGoldSettings();
+                LastLoadMigratedLegacyDefaults = true;
+                TrySave(settingsFilePath, Current);
+            }
 
             return Current;
         }
@@ -116,6 +128,18 @@ namespace TrueTownGold
                 : validatedMaximumTownGold;
         }
 
+        internal static bool ShouldReplaceLegacyDefaults(TownGoldSettings settings)
+        {
+            if (settings == null)
+            {
+                return false;
+            }
+
+            return Math.Abs(settings.GlobalTownGoldMultiplier - LegacyDefaultGlobalTownGoldMultiplier) < 0.0001f
+                && settings.MinimumTownGold == LegacyDefaultMinimumTownGold
+                && settings.MaximumTownGold == LegacyDefaultMaximumTownGold;
+        }
+
         private static float ParseGlobalTownGoldMultiplier(string multiplierValue)
         {
             if (!float.TryParse(
@@ -156,6 +180,38 @@ namespace TrueTownGold
             }
 
             return ValidateMaximumTownGold(parsedMaximumTownGold, minimumTownGold);
+        }
+
+        private static void TrySave(string settingsFilePath, TownGoldSettings settings)
+        {
+            if (string.IsNullOrWhiteSpace(settingsFilePath) || settings == null)
+            {
+                return;
+            }
+
+            try
+            {
+                string directory = Path.GetDirectoryName(settingsFilePath);
+                if (!string.IsNullOrWhiteSpace(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                var document = new XDocument(
+                    new XElement(
+                        "TrueTownGoldSettings",
+                        new XElement(
+                            nameof(GlobalTownGoldMultiplier),
+                            settings.GetValidatedGlobalTownGoldMultiplier().ToString(CultureInfo.InvariantCulture)),
+                        new XElement(nameof(MinimumTownGold), settings.GetValidatedMinimumTownGold()),
+                        new XElement(nameof(MaximumTownGold), settings.GetValidatedMaximumTownGold())));
+
+                document.Save(settingsFilePath);
+            }
+            catch
+            {
+                // Keep running with the migrated in-memory settings even if the file cannot be rewritten.
+            }
         }
     }
 }

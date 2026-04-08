@@ -57,10 +57,12 @@ Raise `MaximumTownGold` if you want wealthy towns to exceed the old 150,000 cap.
 The default values are:
 
 - `BaseGoldPerProsperity = 10`
-- `GlobalTownGoldMultiplier = 2.0`
-- `DefaultGoldPerProsperity = 20`
-- `MinimumTownGold = 15,000`
-- `MaximumTownGold = 500,000`
+- `GlobalTownGoldMultiplier = 10.0`
+- `DefaultGoldPerProsperity = 100`
+- `MinimumTownGold = 100,000`
+- `MaximumTownGold = 999,999,999`
+
+If you previously deployed an older build that still used `2.0 / 15,000 / 500,000`, the mod now upgrades that untouched legacy settings file automatically the next time it loads.
 
 There is still no MCM menu, in-game toggle, or console command.
 
@@ -82,7 +84,7 @@ targetGold = clamp(prosperity × (10 × globalTownGoldMultiplier), minimumTownGo
 With the default settings file, this resolves to:
 
 ```text
-targetGold = clamp(prosperity × 20, 15,000, 500,000)
+targetGold = clamp(prosperity × 100, 100,000, 999,999,999)
 ```
 
 If a town already has at least that much gold, nothing happens. If it has less, the difference is added with `Town.ChangeGold(...)`.

@@ -18,6 +18,34 @@ $ErrorActionPreference = "Stop"
 $ModuleName = "TrueTownGold"
 $TargetModuleDir = Join-Path $GameFolder "Modules\$ModuleName"
 
+function Test-IsLegacyDefaultSettingsFile {
+    param(
+        [string]$Path
+    )
+
+    if (-not (Test-Path $Path)) {
+        return $false
+    }
+
+    try {
+        [xml]$settings = Get-Content $Path
+        [double]$multiplier = [double]::Parse(
+            $settings.TrueTownGoldSettings.GlobalTownGoldMultiplier,
+            [System.Globalization.CultureInfo]::InvariantCulture)
+        [int]$minimumTownGold = [int]::Parse(
+            $settings.TrueTownGoldSettings.MinimumTownGold,
+            [System.Globalization.CultureInfo]::InvariantCulture)
+        [int]$maximumTownGold = [int]::Parse(
+            $settings.TrueTownGoldSettings.MaximumTownGold,
+            [System.Globalization.CultureInfo]::InvariantCulture)
+
+        return $multiplier -eq 2.0 -and $minimumTownGold -eq 15000 -and $maximumTownGold -eq 500000
+    }
+    catch {
+        return $false
+    }
+}
+
 Write-Host "=== Building $ModuleName ===" -ForegroundColor Cyan
 
 dotnet build "src\TrueTownGold\TrueTownGold.csproj" `
@@ -41,25 +69,31 @@ $settingsFile = "Module\TrueTownGold.settings.xml"
 $targetSettingsFile = Join-Path $TargetModuleDir "TrueTownGold.settings.xml"
 if (Test-Path $settingsFile) {
     if (Test-Path $targetSettingsFile) {
-        try {
-            [xml]$templateSettings = Get-Content $settingsFile
-            [xml]$existingSettings = Get-Content $targetSettingsFile
-
-            foreach ($templateNode in $templateSettings.DocumentElement.ChildNodes) {
-                if ($templateNode.NodeType -ne [System.Xml.XmlNodeType]::Element) {
-                    continue
-                }
-
-                if (-not $existingSettings.DocumentElement.SelectSingleNode($templateNode.Name)) {
-                    $importedNode = $existingSettings.ImportNode($templateNode, $true)
-                    [void]$existingSettings.DocumentElement.AppendChild($importedNode)
-                }
-            }
-
-            $existingSettings.Save($targetSettingsFile)
+        if (Test-IsLegacyDefaultSettingsFile -Path $targetSettingsFile) {
+            Copy-Item $settingsFile -Destination $targetSettingsFile -Force
+            Write-Host "Upgraded legacy TrueTownGold settings to the current recommended defaults." -ForegroundColor Yellow
         }
-        catch {
-            Write-Warning "Could not merge missing settings keys into $targetSettingsFile. Existing file left unchanged."
+        else {
+            try {
+                [xml]$templateSettings = Get-Content $settingsFile
+                [xml]$existingSettings = Get-Content $targetSettingsFile
+
+                foreach ($templateNode in $templateSettings.DocumentElement.ChildNodes) {
+                    if ($templateNode.NodeType -ne [System.Xml.XmlNodeType]::Element) {
+                        continue
+                    }
+
+                    if (-not $existingSettings.DocumentElement.SelectSingleNode($templateNode.Name)) {
+                        $importedNode = $existingSettings.ImportNode($templateNode, $true)
+                        [void]$existingSettings.DocumentElement.AppendChild($importedNode)
+                    }
+                }
+
+                $existingSettings.Save($targetSettingsFile)
+            }
+            catch {
+                Write-Warning "Could not merge missing settings keys into $targetSettingsFile. Existing file left unchanged."
+            }
         }
     }
     else {
