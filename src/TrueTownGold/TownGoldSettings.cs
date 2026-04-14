@@ -12,11 +12,11 @@ namespace TrueTownGold
     {
         internal const string SettingsFileName = "TrueTownGold.settings.xml";
         internal const float LegacyDefaultGlobalTownGoldMultiplier = 2.0f;
-        internal const int LegacyDefaultMinimumTownGold = 15000;
-        internal const int LegacyDefaultMaximumTownGold = 500000;
+        internal const int LegacyDefaultMinimumTownGold = 15_000;
+        internal const int LegacyDefaultMaximumTownGold = 500_000;
         internal const float DefaultGlobalTownGoldMultiplier = 10.0f;
-        internal const int DefaultMinimumTownGold = 100000;
-        internal const int DefaultMaximumTownGold = 999999999;
+        internal const int DefaultMinimumTownGold = 500_000;
+        internal const int DefaultMaximumTownGold = 999_999_999;
 
         internal static TownGoldSettings Current { get; private set; } = new TownGoldSettings();
         internal static bool LastLoadMigratedLegacyDefaults { get; private set; }
